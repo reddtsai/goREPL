@@ -12,6 +12,7 @@ func main() {
 	repl.AddCreateFolderCmd()
 	repl.AddDeleteFolderCmd()
 	repl.AddListFolderCmd()
+	repl.AddRenameFolderCmd()
 	err := repl.Execute()
 	if err != nil {
 		log.Fatalln(err)

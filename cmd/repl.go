@@ -38,16 +38,6 @@ func New() *Repl {
 
 // Execute runs the REPL
 func (r *Repl) Execute() error {
-
-	r.storage.AddUser("redd")
-	r.storage.AddFolder("redd", "d", "")
-	r.storage.AddFolder("redd", "e", "")
-	r.storage.AddFolder("redd", "a", "a")
-	r.storage.AddFolder("redd", "b", "")
-	r.storage.AddFolder("redd", "c", "c")
-	r.storage.AddFolder("redd", "g", "")
-	r.storage.AddFolder("redd", "f", "f")
-
 	return r.rootCmd.Execute()
 }
 
@@ -258,8 +248,8 @@ func (r *Repl) AddListFolderCmd() {
 	cmd := &cobra.Command{
 		Use:   "list-folders",
 		Short: "list user folders",
-		Args:  r.ListFolderValidation,
-		RunE:  r.ListFolderRunner,
+		Args:  r.ListFoldersValidation,
+		RunE:  r.ListFoldersRunner,
 	}
 	cmd.Flags().StringVar(&r.folderSortName, "sort-name", "asc", "Sort by name with asc or desc")
 	cmd.Flags().StringVar(&r.folderSortCreated, "sort-created", "", "Sort by created with asc or desc")
@@ -267,7 +257,7 @@ func (r *Repl) AddListFolderCmd() {
 	r.rootCmd.AddCommand(cmd)
 }
 
-func (r *Repl) ListFolderValidation(cmd *cobra.Command, args []string) error {
+func (r *Repl) ListFoldersValidation(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 	l := len(args)
 	if l != 1 {
@@ -284,9 +274,9 @@ func (r *Repl) ListFolderValidation(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (r *Repl) ListFolderRunner(cmd *cobra.Command, args []string) error {
+func (r *Repl) ListFoldersRunner(cmd *cobra.Command, args []string) error {
 	defer func() {
-		r.folderSortName = ""
+		r.folderSortName = "asc"
 		r.folderSortCreated = ""
 	}()
 
@@ -313,4 +303,60 @@ func (r *Repl) ListFolderRunner(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func (r *Repl) AddRenameFolderCmd() {
+	cmd := &cobra.Command{
+		Use:   "rename-folder",
+		Short: "rename a folder for a user",
+		Args:  r.RenameFolderValidation,
+		Run:   r.RenameFolderRunner,
+	}
+
+	r.rootCmd.AddCommand(cmd)
+}
+
+func (r *Repl) RenameFolderValidation(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
+	l := len(args)
+
+	if l != 3 {
+		return fmt.Errorf("invalid command")
+	}
+	// case insensitive
+	userName := strings.ToLower(args[0])
+	folderName := strings.ToLower(args[1])
+	newFolderName := strings.ToLower(args[2])
+	// input validation
+	exist := r.storage.IsExistUser(userName)
+	if !exist {
+		return fmt.Errorf("the [%s] doesn't exist", userName)
+	}
+	exist = r.storage.IsExistFolder(userName, folderName)
+	if !exist {
+		return fmt.Errorf("the [%s] doesn't exist", folderName)
+	}
+	exist = r.storage.IsExistFolder(userName, newFolderName)
+	if exist {
+		return fmt.Errorf("the [%s] has already existed", newFolderName)
+	}
+	fl := len(newFolderName)
+	if fl < 1 || fl > 100 {
+		return fmt.Errorf("the [%s] invalid length", newFolderName)
+	}
+	re := regexp.MustCompile(`^[a-zA-Z0-9\.\-\~\_\=\:]+$`)
+	if !re.MatchString(newFolderName) {
+		return fmt.Errorf("the [%s] contain invalid chars", newFolderName)
+	}
+
+	return nil
+}
+
+func (r *Repl) RenameFolderRunner(cmd *cobra.Command, args []string) {
+	// case insensitive
+	userName := strings.ToLower(args[0])
+	folderName := strings.ToLower(args[1])
+	newFolderName := strings.ToLower(args[2])
+	r.storage.RenameFolder(userName, folderName, newFolderName)
+	fmt.Printf("Rename %s to %s successfully\n", folderName, newFolderName)
 }

@@ -13,6 +13,7 @@ type IStorage interface {
 
 	AddFolder(string, string, string)
 	DeleteFolder(string, string)
+	RenameFolder(string, string, string)
 	IsExistFolder(string, string) bool
 	ListFolder(string, string, string) []VirtualFileSysEntity
 }
@@ -31,20 +32,6 @@ type VirtualFileSysEntity struct {
 	FileName         string
 	FileCreateTime   int64
 	FileDesc         string
-}
-
-type VirtualFileSysEntitiesByFolderName []VirtualFileSysEntity
-
-func (e VirtualFileSysEntitiesByFolderName) Len() int {
-	return len(e)
-}
-
-func (e VirtualFileSysEntitiesByFolderName) Swap(i, j int) {
-	e[i], e[j] = e[j], e[i]
-}
-
-func (e VirtualFileSysEntitiesByFolderName) Less(i, j int) bool {
-	return e[i].FolderName < e[j].FolderName
 }
 
 func NewVirtualFileSysStorage() IStorage {
@@ -97,7 +84,9 @@ func (v *VirtualFileSysStorage) DeleteFolder(userName, folderName string) {
 	defer v.mu.Unlock()
 
 	entities := v.Data[userName]
-	sort.Sort(VirtualFileSysEntitiesByFolderName(entities))
+	sort.Slice(entities, func(i, j int) bool {
+		return entities[i].FolderName < entities[j].FolderName
+	})
 	// 使用二分查找找到第一个符合条件的索引
 	index := sort.Search(len(entities), func(i int) bool {
 		return entities[i].FolderName >= folderName
@@ -136,4 +125,20 @@ func (v *VirtualFileSysStorage) ListFolder(userName, sortName, orderBy string) [
 	}
 
 	return entities
+}
+
+func (v *VirtualFileSysStorage) RenameFolder(userName, folderName, newFolderName string) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+
+	entities := v.Data[userName]
+	sort.Slice(entities, func(i, j int) bool {
+		return entities[i].FolderName < entities[j].FolderName
+	})
+	index := sort.Search(len(entities), func(i int) bool {
+		return entities[i].FolderName >= folderName
+	})
+	if index < len(entities) && entities[index].FolderName == folderName {
+		entities[index].FolderName = newFolderName
+	}
 }
