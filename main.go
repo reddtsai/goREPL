@@ -11,8 +11,12 @@ func main() {
 	repl.AddRegisterCmd()
 	repl.AddCreateFolderCmd()
 	repl.AddDeleteFolderCmd()
-	repl.AddListFolderCmd()
+	repl.AddListFoldersCmd()
 	repl.AddRenameFolderCmd()
+	repl.AddCreateFileCmd()
+	repl.AddDeleteFileCmd()
+	repl.AddListFilesCmd()
+
 	err := repl.Execute()
 	if err != nil {
 		log.Fatalln(err)
