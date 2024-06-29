@@ -77,3 +77,23 @@ This is a command-line program developed by Golang, allowing users to operate th
 | Error    | the [username] doesn't exist                     |
 | Error    | unknown flag                                     |
 | Error    | the [asc desc] invalid                           |
+
+### Rename Folder
+
+`rename-folder [username] [foldername] [newfoldername]`
+
+| Parameter     | Type   | Lenght  | Desc                                                                                                                                                                                                               |
+| ------------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| username      | string | 3 - 20  | case insensitive, contain only contain letters and numbers                                                                                                                                                         |
+| foldername    | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
+| newfoldername | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
+
+| Response | Desc                                                |
+| -------- | --------------------------------------------------- |
+| Success  | Rename [foldername] to [newfoldername] successfully |
+| Error    | invalid command                                     |
+| Error    | the [username] doesn't exist                        |
+| Error    | the [foldername] doesn't exist                      |
+| Error    | the [newfoldername] invalid length                  |
+| Error    | the [newfoldername] contain invalid chars           |
+| Error    | the [newfoldername] has already existed             |
