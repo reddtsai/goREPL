@@ -59,27 +59,38 @@ func (r *Repl) RootCmdRunner(cmd *cobra.Command, args []string) {
 			fmt.Println("Goodbye!")
 			return
 		case "help":
-			fmt.Println("> register [username]")
-			fmt.Println("> create-folder [username] [foldername] [description]?")
-			fmt.Println("> delete-folder [username] [foldername]")
-			fmt.Println("> list-folders [username] [--sort-name|--sort-created] [asc|desc]")
-			fmt.Println("> rename-folder [username] [foldername] [new-foldername]")
-			fmt.Println("> create-file [username] [foldername] [filename] [description]?")
-			fmt.Println("> delete-file [username] [foldername] [filename]")
-			fmt.Println("> list-files [username] [foldername] [--sort-name|--sort-created] [asc|desc]")
+			r.Help()
 		default:
 			args := r.SplitArgs(line)
 			if len(args) > 0 {
 				foundCmd, _, err := cmd.Find(args)
 				if err != nil || foundCmd == r.rootCmd {
-					fmt.Fprintln(os.Stderr, "Error: Invalid command.")
+					fmt.Fprintln(os.Stderr, "Error: unrecognized command.")
 					continue
 				}
+				err = foundCmd.ParseFlags(args)
+				if err != nil {
+					fmt.Println(foundCmd.UsageString())
+					continue
+				}
+
 				cmd.SetArgs(args)
 				_ = cmd.Execute()
 			}
 		}
 	}
+}
+
+func (r *Repl) Help() {
+	fmt.Println("Usage:")
+	fmt.Println("  register [username]")
+	fmt.Println("  create-folder [username] [foldername] [description]?")
+	fmt.Println("  delete-folder [username] [foldername]")
+	fmt.Println("  list-folders [username] [--sort-name|--sort-created] [asc|desc]")
+	fmt.Println("  rename-folder [username] [foldername] [new-foldername]")
+	fmt.Println("  create-file [username] [foldername] [filename] [description]?")
+	fmt.Println("  delete-file [username] [foldername] [filename]")
+	fmt.Println("  list-files [username] [foldername] [--sort-name|--sort-created] [asc|desc]")
 }
 
 func (r *Repl) SplitArgs(line string) []string {
@@ -115,6 +126,7 @@ func (r *Repl) AddRegisterCmd() {
 		Args:  r.RegisterValidation,
 		Run:   r.RegisterRunner,
 	}
+	cmd.SetUsageTemplate("Usage:\n  register [username]")
 
 	r.rootCmd.AddCommand(cmd)
 }
@@ -122,7 +134,7 @@ func (r *Repl) AddRegisterCmd() {
 func (r *Repl) RegisterValidation(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 	if len(args) != 1 {
-		return fmt.Errorf("invalid command")
+		return fmt.Errorf("unrecognized argument\n%s", cmd.UsageString())
 	}
 	// case insensitive
 	userName := strings.ToLower(args[0])
@@ -156,6 +168,7 @@ func (r *Repl) AddCreateFolderCmd() {
 		Args:  r.CreateFolderValidation,
 		Run:   r.CreateFolderRunner,
 	}
+	cmd.SetUsageTemplate("Usage:\n  create-folder [username] [foldername] [description]?")
 
 	r.rootCmd.AddCommand(cmd)
 }
@@ -190,7 +203,7 @@ func (r *Repl) CreateFolderValidation(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("the [description] invalid length")
 		}
 	default:
-		return fmt.Errorf("invalid command")
+		return fmt.Errorf("unrecognized argument\n%s", cmd.UsageString())
 	}
 
 	return nil
@@ -216,6 +229,7 @@ func (r *Repl) AddDeleteFolderCmd() {
 		Args:  r.DeleteFolderValidation,
 		Run:   r.DeleteFolderRunner,
 	}
+	cmd.SetUsageTemplate("Usage:\n  delete-folder [username] [foldername]")
 
 	r.rootCmd.AddCommand(cmd)
 }
@@ -224,7 +238,7 @@ func (r *Repl) DeleteFolderValidation(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 	l := len(args)
 	if l != 2 {
-		return fmt.Errorf("invalid command")
+		return fmt.Errorf("unrecognized argument\n%s", cmd.UsageString())
 	}
 	// case insensitive
 	userName := strings.ToLower(args[0])
@@ -257,10 +271,11 @@ func (r *Repl) AddListFoldersCmd() {
 		Use:   "list-folders",
 		Short: "list user folders",
 		Args:  r.ListFoldersValidation,
-		RunE:  r.ListFoldersRunner,
+		Run:   r.ListFoldersRunner,
 	}
-	cmd.Flags().StringVar(&r.folderSortName, "sort-name", "asc", "Sort by name with asc or desc")
+	cmd.Flags().StringVar(&r.folderSortName, "sort-name", "", "Sort by name with asc or desc")
 	cmd.Flags().StringVar(&r.folderSortCreated, "sort-created", "", "Sort by created with asc or desc")
+	cmd.SetUsageTemplate("Usage:\n  list-folders [username] [--sort-name|--sort-created] [asc|desc]")
 
 	r.rootCmd.AddCommand(cmd)
 }
@@ -269,8 +284,9 @@ func (r *Repl) ListFoldersValidation(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 	l := len(args)
 	if l != 1 {
-		return fmt.Errorf("invalid command")
+		return fmt.Errorf("unrecognized argument\n%s", cmd.UsageString())
 	}
+
 	// case insensitive
 	userName := strings.ToLower(args[0])
 	// input validation
@@ -282,24 +298,31 @@ func (r *Repl) ListFoldersValidation(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (r *Repl) ListFoldersRunner(cmd *cobra.Command, args []string) error {
+func (r *Repl) ListFoldersRunner(cmd *cobra.Command, args []string) {
 	defer func() {
-		r.folderSortName = "asc"
+		r.folderSortName = ""
 		r.folderSortCreated = ""
 	}()
 
 	// case insensitive
 	userName := strings.ToLower(args[0])
-	sortName := "name"
-	orderBy := r.folderSortName
+	sortName, orderBy := "", ""
 	if r.folderSortCreated != "" {
 		sortName = "create"
 		orderBy = r.folderSortCreated
+	} else if r.folderSortName != "" {
+		sortName = "name"
+		orderBy = r.folderSortName
+	} else {
+		// if neither sort-created nor sort-name
+		sortName = "name"
+		orderBy = "asc"
 	}
 	switch orderBy {
 	case "asc", "desc":
 	default:
-		return fmt.Errorf("the [asc|desc] invalid")
+		fmt.Println(cmd.UsageString())
+		return
 	}
 	data := r.storage.ListFolder(userName, sortName, strings.ToLower(orderBy))
 	for _, v := range data {
@@ -309,8 +332,6 @@ func (r *Repl) ListFoldersRunner(cmd *cobra.Command, args []string) error {
 	if len(data) == 0 {
 		fmt.Printf("Warning: the [%s] doesn't have any folders\n", userName)
 	}
-
-	return nil
 }
 
 func (r *Repl) AddRenameFolderCmd() {
@@ -320,6 +341,7 @@ func (r *Repl) AddRenameFolderCmd() {
 		Args:  r.RenameFolderValidation,
 		Run:   r.RenameFolderRunner,
 	}
+	cmd.SetUsageTemplate("Usage:\n  rename-folder [username] [foldername] [new-foldername]")
 
 	r.rootCmd.AddCommand(cmd)
 }
@@ -329,7 +351,7 @@ func (r *Repl) RenameFolderValidation(cmd *cobra.Command, args []string) error {
 	l := len(args)
 
 	if l != 3 {
-		return fmt.Errorf("invalid command")
+		return fmt.Errorf("unrecognized argument\n%s", cmd.UsageString())
 	}
 	// case insensitive
 	userName := strings.ToLower(args[0])
@@ -376,6 +398,7 @@ func (r *Repl) AddCreateFileCmd() {
 		Args:  r.CreateFileValidation,
 		Run:   r.CreateFileRunner,
 	}
+	cmd.SetUsageTemplate("Usage:\n  create-file [username] [foldername] [filename] [description]?")
 
 	r.rootCmd.AddCommand(cmd)
 }
@@ -415,7 +438,7 @@ func (r *Repl) CreateFileValidation(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("the [description] invalid length")
 		}
 	default:
-		return fmt.Errorf("invalid command")
+		return fmt.Errorf("unrecognized argumen\n%s", cmd.UsageString())
 	}
 
 	return nil
@@ -442,6 +465,7 @@ func (r *Repl) AddDeleteFileCmd() {
 		Args:  r.DeleteFileValidation,
 		Run:   r.DeleteFileRunner,
 	}
+	cmd.SetUsageTemplate("Usage:\n  delete-file [username] [foldername] [filename]")
 
 	r.rootCmd.AddCommand(cmd)
 }
@@ -450,7 +474,7 @@ func (r *Repl) DeleteFileValidation(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 	l := len(args)
 	if l != 3 {
-		return fmt.Errorf("invalid command")
+		return fmt.Errorf("unrecognized argument\n%s", cmd.UsageString())
 	}
 	// case insensitive
 	userName := strings.ToLower(args[0])
@@ -481,7 +505,7 @@ func (r *Repl) DeleteFileRunner(cmd *cobra.Command, args []string) {
 	fileName := strings.ToLower(args[2])
 
 	r.storage.DeleteFile(userName, folderName, fileName)
-	fmt.Printf("Delete [%s] in [%s]/[%s]  successfully\n", fileName, userName, folderName)
+	fmt.Printf("Delete [%s] in [%s]/[%s] successfully\n", fileName, userName, folderName)
 }
 
 func (r *Repl) AddListFilesCmd() {
@@ -489,10 +513,11 @@ func (r *Repl) AddListFilesCmd() {
 		Use:   "list-files",
 		Short: "list user files",
 		Args:  r.ListFilesValidation,
-		RunE:  r.ListFilesRunner,
+		Run:   r.ListFilesRunner,
 	}
 	cmd.Flags().StringVar(&r.fileSortName, "sort-name", "asc", "Sort by name with asc or desc")
 	cmd.Flags().StringVar(&r.fileSortCreated, "sort-created", "", "Sort by created with asc or desc")
+	cmd.SetUsageTemplate("Usage:\n  list-files [username] [foldername] [--sort-name|--sort-created] [asc|desc]")
 
 	r.rootCmd.AddCommand(cmd)
 }
@@ -501,8 +526,9 @@ func (r *Repl) ListFilesValidation(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 	l := len(args)
 	if l != 2 {
-		return fmt.Errorf("invalid command")
+		return fmt.Errorf("unrecognized argument\n%s", cmd.UsageString())
 	}
+
 	// case insensitive
 	userName := strings.ToLower(args[0])
 	folderName := strings.ToLower(args[1])
@@ -516,30 +542,36 @@ func (r *Repl) ListFilesValidation(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("the [%s] doesn't exist", folderName)
 
 	}
-	// TODO: flag validation
 
 	return nil
 }
 
-func (r *Repl) ListFilesRunner(cmd *cobra.Command, args []string) error {
+func (r *Repl) ListFilesRunner(cmd *cobra.Command, args []string) {
 	defer func() {
-		r.fileSortName = "asc"
+		r.fileSortName = ""
 		r.fileSortCreated = ""
 	}()
 
 	// case insensitive
 	userName := strings.ToLower(args[0])
 	folderName := strings.ToLower(args[1])
-	sortName := "name"
-	orderBy := r.fileSortName
+	sortName, orderBy := "", ""
 	if r.fileSortCreated != "" {
 		sortName = "create"
 		orderBy = r.fileSortCreated
+	} else if r.folderSortName != "" {
+		sortName = "name"
+		orderBy = r.folderSortName
+	} else {
+		// if neither sort-created nor sort-name
+		sortName = "name"
+		orderBy = "asc"
 	}
 	switch orderBy {
 	case "asc", "desc":
 	default:
-		return fmt.Errorf("the [asc|desc] invalid")
+		fmt.Println(cmd.UsageString())
+		return
 	}
 	data := r.storage.ListFile(userName, folderName, sortName, strings.ToLower(orderBy))
 	for _, v := range data {
@@ -549,6 +581,4 @@ func (r *Repl) ListFilesRunner(cmd *cobra.Command, args []string) error {
 	if len(data) == 0 {
 		fmt.Printf("Warning: the [%s] is empty\n", folderName)
 	}
-
-	return nil
 }

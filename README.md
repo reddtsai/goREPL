@@ -2,6 +2,10 @@
 
 This is a command-line program developed by Golang, allowing users to operate the file system through commands.
 
+# Installation
+
+`go install github.com/reddtsai/goREPL`
+
 # Commands
 
 ## User Management
@@ -12,14 +16,14 @@ This is a command-line program developed by Golang, allowing users to operate th
 
 Register a user.
 
-| Parameter | Type   | Lenght | Desc                                                   |
-| --------- | ------ | ------ | ------------------------------------------------------ |
-| username  | string | 3 - 20 | case insensitive, can only contain letters and numbers |
+| Parameter | Type   | Lenght | Desc                                                    |
+| --------- | ------ | ------ | ------------------------------------------------------- |
+| username  | string | 3 - 20 | case insensitive, can only contain letters and numbers. |
 
-| Response | Desc                                 |
+| Response | Content                              |
 | -------- | ------------------------------------ |
 | Success  | add [username] successfully          |
-| Error    | invalid command                      |
+| Error    | unrecognized argument                |
 | Error    | the [username] invalid length        |
 | Error    | the [username] contain invalid chars |
 | Error    | the [username] has already existed   |
@@ -34,14 +38,14 @@ Create a folder for a user.
 
 | Parameter   | Type   | Lenght  | Desc                                                                                                                                                                                                               |
 | ----------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| username    | string | 3 - 20  | case insensitive, contain only contain letters and numbers                                                                                                                                                         |
+| username    | string | 3 - 20  | case insensitive, contain only contain letters and numbers.                                                                                                                                                        |
 | foldername  | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
-| description | string | 500     |                                                                                                                                                                                                                    |
+| description | string | 500     | you can use either double quotes (“”) or single quotes(‘’).                                                                                                                                                        |
 
-| Response | Desc                                   |
+| Response | Content                                |
 | -------- | -------------------------------------- |
 | Success  | create [foldername] successfully       |
-| Error    | invalid command                        |
+| Error    | unrecognized argument                  |
 | Error    | the [username] doesn't exist           |
 | Error    | the [foldername] invalid length        |
 | Error    | the [foldername] contain invalid chars |
@@ -56,13 +60,13 @@ Delete a folder for a user.
 
 | Parameter  | Type   | Lenght  | Desc                                                                                                                                                                                                               |
 | ---------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| username   | string | 3 - 20  | case insensitive, contain only contain letters and numbers                                                                                                                                                         |
+| username   | string | 3 - 20  | case insensitive, contain only contain letters and numbers.                                                                                                                                                        |
 | foldername | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
 
-| Response | Desc                             |
+| Response | Content                          |
 | -------- | -------------------------------- |
 | Success  | delete [foldername] successfully |
-| Error    | invalid command                  |
+| Error    | unrecognized argument            |
 | Error    | the [username] doesn't exist     |
 | Error    | the [foldername] doesn't exist   |
 
@@ -72,20 +76,21 @@ Delete a folder for a user.
 
 List user folders.
 
-| Parameter      | Type   | Lenght | Desc                                                   |
-| -------------- | ------ | ------ | ------------------------------------------------------ |
-| username       | string | 3 - 20 | case insensitive, can only contain letters and numbers |
-| --sort-name    | string | 5      | asc or desc                                            |
-| --sort-created | string | 5      | asc or desc                                            |
+| Parameter | Type   | Lenght | Desc                                                    |
+| --------- | ------ | ------ | ------------------------------------------------------- |
+| username  | string | 3 - 20 | case insensitive, can only contain letters and numbers. |
 
-| Response | Desc                                             |
+| Option         | Argument  | Memo                                |
+| -------------- | --------- | ----------------------------------- |
+| --sort-name    | asc, desc | `--sort-name asc` is defaule option |
+| --sort-created | asc, desc |                                     |
+
+| Response | Content                                          |
 | -------- | ------------------------------------------------ |
 | Success  | List {foldername description createat username } |
 | Warning  | the [username] doesn't have any folders          |
-| Error    | invalid command                                  |
+| Error    | unrecognized argument                            |
 | Error    | the [username] doesn't exist                     |
-| Error    | unknown flag                                     |
-| Error    | the [asc desc] invalid                           |
 
 ### Rename Folder
 
@@ -95,14 +100,14 @@ Rename a folder for a user.
 
 | Parameter     | Type   | Lenght  | Desc                                                                                                                                                                                                               |
 | ------------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| username      | string | 3 - 20  | case insensitive, contain only contain letters and numbers                                                                                                                                                         |
+| username      | string | 3 - 20  | case insensitive, contain only contain letters and numbers.                                                                                                                                                        |
 | foldername    | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
 | newfoldername | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
 
-| Response | Desc                                                |
+| Response | Content                                             |
 | -------- | --------------------------------------------------- |
 | Success  | rename [foldername] to [newfoldername] successfully |
-| Error    | invalid command                                     |
+| Error    | unrecognized argument                               |
 | Error    | the [username] doesn't exist                        |
 | Error    | the [foldername] doesn't exist                      |
 | Error    | the [newfoldername] invalid length                  |
@@ -119,15 +124,15 @@ Create a file for a user.
 
 | Parameter   | Type   | Lenght  | Desc                                                                                                                                                                                                               |
 | ----------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| username    | string | 3 - 20  | case insensitive, contain only contain letters and numbers                                                                                                                                                         |
+| username    | string | 3 - 20  | case insensitive, contain only contain letters and numbers.                                                                                                                                                        |
 | foldername  | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
 | filename    | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
-| description | string | 500     |                                                                                                                                                                                                                    |
+| description | string | 500     | you can use either double quotes (“”) or single quotes(‘’).                                                                                                                                                        |
 
-| Response | Desc                                                      |
+| Response | Content                                                   |
 | -------- | --------------------------------------------------------- |
 | Success  | create [filename] in [username]/[foldername] successfully |
-| Error    | invalid command                                           |
+| Error    | unrecognized argument                                     |
 | Error    | the [username] doesn't exist                              |
 | Error    | the [foldername] doesn't exist                            |
 | Error    | the [filename] invalid length                             |
@@ -143,14 +148,14 @@ Delete a file for a user.
 
 | Parameter  | Type   | Lenght  | Desc                                                                                                                                                                                                               |
 | ---------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| username   | string | 3 - 20  | case insensitive, contain only contain letters and numbers                                                                                                                                                         |
+| username   | string | 3 - 20  | case insensitive, contain only contain letters and numbers.                                                                                                                                                        |
 | foldername | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
 | filename   | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
 
-| Response | Desc                                                      |
+| Response | Content                                                   |
 | -------- | --------------------------------------------------------- |
 | Success  | delete [filename] in [username]/[foldername] successfully |
-| Error    | invalid command                                           |
+| Error    | unrecognized argument                                     |
 | Error    | the [username] doesn't exist                              |
 | Error    | the [foldername] doesn't exist                            |
 | Error    | the [filename] doesn't exist                              |
@@ -159,22 +164,23 @@ Delete a file for a user.
 
 `list-files [username] [foldername] [--sort-name|--sort-created] [asc|desc]`
 
-| Parameter      | Type   | Lenght  | Desc                                                                                                                                                                                                               |
-| -------------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| username       | string | 3 - 20  | case insensitive, can only contain letters and numbers                                                                                                                                                             |
-| foldername     | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
-| --sort-name    | string | 5       | asc or desc                                                                                                                                                                                                        |
-| --sort-created | string | 5       | asc or desc                                                                                                                                                                                                        |
+| Parameter  | Type   | Lenght  | Desc                                                                                                                                                                                                               |
+| ---------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| username   | string | 3 - 20  | case insensitive, can only contain letters and numbers.                                                                                                                                                            |
+| foldername | string | 1 - 100 | case insensitive, contain only the following characters: uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), periods (.), hyphens (-), tildes (~), underscores (\_), equal signs (=), and colons (:). |
 
-| Response | Desc                                                      |
+| Option         | Argument  | Memo                                |
+| -------------- | --------- | ----------------------------------- |
+| --sort-name    | asc, desc | `--sort-name asc` is defaule option |
+| --sort-created | asc, desc |                                     |
+
+| Response | Content                                                   |
 | -------- | --------------------------------------------------------- |
 | Success  | List {filename description createat foldername username } |
 | Warning  | the [foldername] is empty                                 |
-| Error    | invalid command                                           |
+| Error    | unrecognized argument                                     |
 | Error    | the [username] doesn't exist                              |
 | Error    | the [foldername] doesn't exist                            |
-| Error    | unknown flag                                              |
-| Error    | the [asc desc] invalid                                    |
 
 ## Help
 
