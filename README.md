@@ -2,7 +2,9 @@
 
 This is a command-line program developed by Golang, allowing users to operate the file system through commands.
 
-[![Build Status][ci-badge]][ci-runs]
+# Your Project Name
+
+[![Build Status](https://github.com/reddtsai/goREPL/actions/workflows/go.yml/badge.svg)](https://github.com/reddtsai/goREPL/actions)
 
 # Installation
 
