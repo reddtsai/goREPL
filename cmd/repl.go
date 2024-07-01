@@ -59,7 +59,7 @@ func (r *Repl) RootCmdRunner(cmd *cobra.Command, args []string) {
 			fmt.Println("Goodbye!")
 			return
 		case "help":
-			r.Help()
+			r.HelpCmd()
 		default:
 			args := r.SplitArgs(line)
 			if len(args) > 0 {
@@ -81,7 +81,7 @@ func (r *Repl) RootCmdRunner(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (r *Repl) Help() {
+func (r *Repl) HelpCmd() {
 	fmt.Println("Usage:")
 	fmt.Println("  register [username]")
 	fmt.Println("  create-folder [username] [foldername] [description]?")
@@ -318,13 +318,14 @@ func (r *Repl) ListFoldersRunner(cmd *cobra.Command, args []string) {
 		sortName = "name"
 		orderBy = "asc"
 	}
+	orderBy = strings.ToLower(orderBy)
 	switch orderBy {
 	case "asc", "desc":
 	default:
 		fmt.Println(cmd.UsageString())
 		return
 	}
-	data := r.storage.ListFolder(userName, sortName, strings.ToLower(orderBy))
+	data := r.storage.ListFolder(userName, sortName, orderBy)
 	for _, v := range data {
 		tt := time.Unix(v.FolderCreateTime, 0).Format("2006-01-02 15:04:05")
 		fmt.Printf("%s %s %s %s\n", v.FolderName, v.FolderDesc, tt, v.UserName)
@@ -438,7 +439,7 @@ func (r *Repl) CreateFileValidation(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("the [description] invalid length")
 		}
 	default:
-		return fmt.Errorf("unrecognized argumen\n%s", cmd.UsageString())
+		return fmt.Errorf("unrecognized argument\n%s", cmd.UsageString())
 	}
 
 	return nil
@@ -515,7 +516,7 @@ func (r *Repl) AddListFilesCmd() {
 		Args:  r.ListFilesValidation,
 		Run:   r.ListFilesRunner,
 	}
-	cmd.Flags().StringVar(&r.fileSortName, "sort-name", "asc", "Sort by name with asc or desc")
+	cmd.Flags().StringVar(&r.fileSortName, "sort-name", "", "Sort by name with asc or desc")
 	cmd.Flags().StringVar(&r.fileSortCreated, "sort-created", "", "Sort by created with asc or desc")
 	cmd.SetUsageTemplate("Usage:\n  list-files [username] [foldername] [--sort-name|--sort-created] [asc|desc]")
 
@@ -559,21 +560,22 @@ func (r *Repl) ListFilesRunner(cmd *cobra.Command, args []string) {
 	if r.fileSortCreated != "" {
 		sortName = "create"
 		orderBy = r.fileSortCreated
-	} else if r.folderSortName != "" {
+	} else if r.fileSortName != "" {
 		sortName = "name"
-		orderBy = r.folderSortName
+		orderBy = r.fileSortName
 	} else {
 		// if neither sort-created nor sort-name
 		sortName = "name"
 		orderBy = "asc"
 	}
+	orderBy = strings.ToLower(orderBy)
 	switch orderBy {
 	case "asc", "desc":
 	default:
 		fmt.Println(cmd.UsageString())
 		return
 	}
-	data := r.storage.ListFile(userName, folderName, sortName, strings.ToLower(orderBy))
+	data := r.storage.ListFile(userName, folderName, sortName, orderBy)
 	for _, v := range data {
 		tt := time.Unix(v.FileCreateTime, 0).Format("2006-01-02 15:04:05")
 		fmt.Printf("%s %s %s %s %s\n", v.FileName, v.FileDesc, tt, folderName, userName)
