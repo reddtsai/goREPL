@@ -2,13 +2,25 @@
 
 This is a command-line program developed by Golang, allowing users to operate the file system through commands.
 
-# Your Project Name
-
 [![Build Status](https://github.com/reddtsai/goREPL/actions/workflows/go.yml/badge.svg)](https://github.com/reddtsai/goREPL/actions)
 
-# Installation
+# Installation & Start
 
-`go install github.com/reddtsai/goREPL`
+Once you have [installed Go](https://go.dev/dl/), install goREPL
+
+`go install github.com/reddtsai/goREPL@v1.0.0`
+
+```
+Go 1.21+
+```
+
+start on mac
+
+`./goREPL`
+
+start on windows
+
+`.\goREPL.exe`
 
 # Commands
 
