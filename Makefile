@@ -9,5 +9,14 @@ gen-mock:
 test:
 	go test -v ./...
 
+test-race:
+	go test -race
+
 test-coverage:
 	go test -cover ./...
+
+release:
+	goreleaser release --rm-dist
+
+local-release:
+	goreleaser release --snapshot --clean
