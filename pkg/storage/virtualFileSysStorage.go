@@ -4,6 +4,7 @@ package storage
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -140,6 +141,15 @@ func (v *VirtualFileSysStorage) RenameFolder(userName, folderName, newFolderName
 	delete(v.FolderMap, key)
 	key = fmt.Sprintf("%s:%s", userName, newFolderName)
 	v.FolderMap[key] = true
+	for k := range v.FileMap {
+		uf := fmt.Sprintf("%s:%s:", userName, folderName)
+		if strings.Contains(k, uf) {
+			newKey := fmt.Sprintf("%s:%s:%s", userName, newFolderName, k[len(userName)+len(folderName)+2:])
+			fmt.Println(newKey, k)
+			v.FileMap[newKey] = true
+			delete(v.FileMap, k)
+		}
+	}
 }
 
 func (v *VirtualFileSysStorage) IsExistFile(userName, folderName, fileName string) bool {

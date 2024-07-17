@@ -1,17 +1,17 @@
 package storage
 
 type IStorage interface {
-	AddUser(string)
-	IsExistUser(string) bool
+	AddUser(userName string)
+	IsExistUser(userName string) bool
 
-	AddFolder(string, string, string)
-	DeleteFolder(string, string)
-	RenameFolder(string, string, string)
-	IsExistFolder(string, string) bool
-	ListFolder(string, string, string) []VirtualFileSysEntity
+	AddFolder(userName, folderName, folderDesc string)
+	DeleteFolder(userName, folderName string)
+	RenameFolder(userName, folderName, newFolderName string)
+	IsExistFolder(userName, folderName string) bool
+	ListFolder(userName, sortName, orderBy string) []VirtualFileSysEntity
 
-	IsExistFile(string, string, string) bool
-	AddFile(string, string, string, string)
-	DeleteFile(string, string, string)
-	ListFile(string, string, string, string) []VirtualFileSysFileEntity
+	IsExistFile(userName, folderName, fileName string) bool
+	AddFile(userName, folderName, fileName, fileDesc string)
+	DeleteFile(userName, folderName, fileName string)
+	ListFile(userName, folderName, sortName, orderBy string) []VirtualFileSysFileEntity
 }
