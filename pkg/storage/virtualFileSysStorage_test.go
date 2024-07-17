@@ -65,6 +65,16 @@ func (t *TestVirtualFileSysStorage) TestRenameFolder() {
 	t.True(t.TestStorage.IsExistFolder("test", "newFolder"))
 }
 
+func (t *TestVirtualFileSysStorage) TestRenameFolderWithFile() {
+	t.TestStorage.AddUser("test")
+	t.TestStorage.AddFolder("test", "folder", "desc")
+	t.TestStorage.AddFile("test", "folder", "file", "desc")
+	t.TestStorage.RenameFolder("test", "folder", "newFolder")
+	t.False(t.TestStorage.IsExistFolder("test", "folder"))
+	t.True(t.TestStorage.IsExistFolder("test", "newFolder"))
+	t.True(t.TestStorage.IsExistFile("test", "newFolder", "file"))
+}
+
 func (t *TestVirtualFileSysStorage) TestListFolderByName() {
 	t.TestStorage.AddUser("test")
 	t.TestStorage.AddFolder("test", "folder1", "desc1")
